@@ -10,3 +10,10 @@ to moving backgrounds or dynamic cameras.
 The FO (Fourier Object Disentanglement) separates the object from the background withput needing any bounding box
 FA captures long range space-time relationships at a very lower computational cost using FFT 
 """
+
+"""
+1- load images from databse
+2- extract features C T W H - Channel, Time, Width and Height
+3- pass through FO and FA transformer blocks^
+4- 
+"""
