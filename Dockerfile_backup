@@ -1,0 +1,26 @@
+# TensorFlow 1.15.5 GPU image (Python 3.6 + CUDA 10.0 + cuDNN 7)
+FROM tensorflow/tensorflow:1.15.5-gpu-py3
+
+WORKDIR /home/pedro/transformer
+COPY . /home/pedro/transformer
+
+# Install dependencies
+RUN pip install --upgrade pip && \
+    pip install tensorflow && \
+    pip install tensorflow==1.15.* && \
+    pip install tensorflow-graphics && \
+    pip install tensorflow-probability==0.7.0 && \
+    pip install --upgrade pip && \
+    pip install -r requirements.txt
+
+# Run the main script
+CMD ["python", "train.py"]
+
+# To build the Docker image, use the following command:
+# sudo docker build -t legacy_transformer .
+
+# sudo docker run --gpus all -it legacy_transformer bash
+
+# To run the container use the following:
+# sudo docker run --gpus all -it legacy_transformer bash
+
