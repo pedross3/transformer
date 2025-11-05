@@ -1,61 +1,41 @@
-# Use NVIDIA CUDA base image with Python 3.6 support
-# TensorFlow 2.6.2 requires CUDA 11.2 and cuDNN 8.1
+# ------------------------------------------------------------
+# TensorFlow 1.15 + CUDA 10.0 + cuDNN 7 on Ubuntu 18.04
+# ------------------------------------------------------------
 FROM nvidia/cuda:11.2.2-cudnn8-runtime-ubuntu18.04
 
-# Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive \
-    PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PATH="/usr/local/bin:${PATH}" \
     LANG=C.UTF-8 \
-    LC_ALL=C.UTF-8
+    LC_ALL=C.UTF-8 \
+    PYTHONUNBUFFERED=1
 
-# Install system dependencies
+# --- System dependencies ----------------------------------------------------
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3.6 \
-    python3.6-dev \
-    python3-pip \
-    python3-setuptools \
-    build-essential \
-    git \
-    wget \
-    curl \
-    ca-certificates \
-    libjpeg-dev \
-    libpng-dev \
-    libgomp1 \
+    python3.6 python3.6-dev python3-pip python3.6-venv \
+    build-essential git wget curl ca-certificates \
+    libfreetype6-dev libpng-dev libsm6 libxext6 libxrender-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Upgrade pip, setuptools, and wheel
+# --- Pip setup --------------------------------------------------------------
 RUN python3.6 -m pip install --no-cache-dir --upgrade pip setuptools wheel
 
-# Set working directory
+# --- TensorFlow 1.15 GPU + extras ------------------------------------------
+RUN pip install --no-cache-dir \
+    tensorflow-gpu==1.15 \
+    tensorflow-graphics==2021.12.3 \
+    numpy==1.18.5 \
+    matplotlib==3.3.4 \
+    pandas==1.1.5 \
+    scipy==1.4.1 \
+    scikit-learn==0.22.2 \
+    seaborn==0.11.0
+
+# --- Working directory ------------------------------------------------------
 WORKDIR /app
+COPY . /app
 
-# Copy requirements file
-COPY requirements.txt .
-
-# Install Python dependencies
-# Install numpy first as some packages depend on it
-RUN pip install --no-cache-dir numpy==1.19.5
-
-# Install TensorFlow with GPU support
-RUN pip install --no-cache-dir tensorflow-gpu==2.6.2
-
-# Install remaining requirements
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy the entire project
-COPY . .
-
-# Create directories for checkpoints and outputs if they don't exist
+# Optional: create output dirs
 RUN mkdir -p checkpoints outputs
 
-# Set Python path to include the current directory
-ENV PYTHONPATH="${PYTHONPATH}:/app"
+ENV PYTHONPATH="/app:${PYTHONPATH}"
 
-# Expose port for TensorBoard (optional)
-EXPOSE 6006
-
-# Default command (can be overridden)
 CMD ["/bin/bash"]
