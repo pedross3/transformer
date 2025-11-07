@@ -43,7 +43,8 @@ RUN pip install --no-cache-dir numpy==1.19.5
 RUN pip install --no-cache-dir tensorflow-gpu==2.6.2
 
 # Install remaining requirements
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt \
+    && pip install tf_slim==1.1.0
 
 # Copy the entire project
 COPY . .
