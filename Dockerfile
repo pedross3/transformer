@@ -43,8 +43,7 @@ RUN pip install --no-cache-dir numpy==1.19.5
 RUN pip install --no-cache-dir tensorflow-gpu==2.6.2
 
 # Install remaining requirements
-RUN pip install --no-cache-dir -r requirements.txt \
-    && pip install tf_slim==1.1.0
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the entire project
 COPY . .
@@ -53,7 +52,7 @@ COPY . .
 RUN mkdir -p checkpoints outputs
 
 # Set Python path to include the current directory
-#ENV PYTHONPATH="${PYTHONPATH}:/app"
+ENV PYTHONPATH="${PYTHONPATH}:/app"
 
 # Expose port for TensorBoard (optional)
 EXPOSE 6006

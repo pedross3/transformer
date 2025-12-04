@@ -1,4 +1,4 @@
-# coding=utf-8
+"""# coding=utf-8
 # Copyright 2022 The Google Research Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,7 +11,7 @@
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
-# limitations under the License.
+# limitations under the License."""
 
 """Train variations of DirectionNet for relative camera pose estimation."""
 import collections
@@ -37,10 +37,11 @@ flags.DEFINE_integer(
 flags.DEFINE_string(
     'checkpoint_dir', '', 'The directory to save checkpoints and summaries.')
 flags.DEFINE_string(
-    'data_dir', '/home/yaroslav/Desktop/yaroslav/matterport/MatterportA_test/R90_fov90/test', 'The training data directory.') # TODO: investigate
+    'data_dir', '/home/pedro/Documents/data/R90_fov90/test/0', 'The training data directory.') # TODO: investigate
 flags.DEFINE_string(
     'model', '9D',
     '9D (rotation), 6D (rotation), T (translation), Single (no derotation)')
+flags.DEFINE_string('encoder', 'siamese', 'Encoder type: siamese | cvt')
 flags.DEFINE_integer('batch', 20, 'The size of mini-batches.')
 flags.DEFINE_integer('n_epoch', -1, 'Number of training epochs.')
 flags.DEFINE_integer(

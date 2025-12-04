@@ -14,7 +14,6 @@
 # limitations under the License.
 
 """DirectionNet Architecture."""
-
 from pano_utils import geometry
 import tensorflow.compat.v1 as tf
 from tensorflow.compat.v1 import keras
@@ -25,7 +24,13 @@ from tensorflow.compat.v1.keras.layers import GlobalAveragePooling2D
 from tensorflow.compat.v1.keras.layers import LeakyReLU
 from tensorflow.compat.v1.keras.layers import UpSampling2D
 from tensorflow.compat.v1.keras.models import Sequential
-tf.disable_v2_behavior()
+
+"""# Optional: Cross-View Transformer encoder
+try:
+  from models.cvt_encoder import CrossViewTransformerEncoder
+except Exception:
+  CrossViewTransformerEncoder = None"""
+
 
 class BottleneckResidualUnit(keras.Model):
   """The fundamental module used to implement deep residual network.
@@ -113,7 +118,15 @@ class DirectionNet(keras.Model):
       n_out: (int) the number of output distributions.
       regularization: L2 regularization factor for layer weights.
     """
+    
     super(DirectionNet, self).__init__()
+    # Encoder choice
+    if encoder_type == 'cvt' and CrossViewTransformerEncoder is not None:
+        self.encoder = CrossViewTransformerEncoder(regularization=regularization)
+    else:
+      self.encoder = SiameseEncoder() 
+    self.inplanes = self.encoder.inplanes
+    
     self.encoder = SiameseEncoder()
     self.inplanes = self.encoder.inplanes
     self.decoder_block1 = Sequential([
