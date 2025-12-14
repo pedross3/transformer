@@ -17,12 +17,12 @@
 import collections
 import time
 
-from absl import app
-from absl import flags
+from absl import app # type: ignore
+from absl import flags # type: ignore
 import dataset_loader
 import losses
 import model
-import tensorflow.compat.v1 as tf
+import tensorflow.compat.v1 as tf # type: ignore
 import util
 
 tf.compat.v1.disable_eager_execution()
@@ -117,7 +117,7 @@ def direction_net_rotation(src_img,
   spread_loss = tf.cast(
       FLAGS.beta, tf.float32) * losses.spread_loss(expectation)
   rotation_error = tf.reduce_mean(util.rotation_geodesic(
-      rotation_estimated, rotation_gt))
+      rotation_estimated, rotation_gt)) # type: ignore
   direction_error = tf.reduce_mean(tf.acos(tf.clip_by_value(
       tf.reduce_sum(directions * directions_gt, -1), -1., 1.)))
 
@@ -377,13 +377,13 @@ def main(argv):
         is_chief=(FLAGS.task == 0),
         hooks=[timing_hook,
                tf.train.StepCounterHook(),
-               tf.train.NanTensorHook(computation.loss)],
+               tf.train.NanTensorHook(computation.loss)], # type: ignore
         checkpoint_dir=FLAGS.checkpoint_dir,
         save_checkpoint_steps=2000,
         save_summaries_secs=180) as sess:
       while not sess.should_stop():
         _, loss, step = sess.run(
-            [computation.train_op, computation.loss, computation.global_step])
+            [computation.train_op, computation.loss, computation.global_step]) # type: ignore
         if step % 10 == 0:
           tf.logging.info('step = {0}, loss = {1}, time = {2}'.format(
               step, loss, timing_hook.timing_log[-1]))

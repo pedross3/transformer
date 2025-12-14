@@ -15,15 +15,15 @@
 
 """DirectionNet Architecture."""
 from pano_utils import geometry
-import tensorflow.compat.v1 as tf
-from tensorflow.compat.v1 import keras
-from tensorflow.compat.v1.keras import regularizers
-from tensorflow.compat.v1.keras.layers import BatchNormalization
-from tensorflow.compat.v1.keras.layers import Conv2D
-from tensorflow.compat.v1.keras.layers import GlobalAveragePooling2D
-from tensorflow.compat.v1.keras.layers import LeakyReLU
-from tensorflow.compat.v1.keras.layers import UpSampling2D
-from tensorflow.compat.v1.keras.models import Sequential
+import tensorflow.compat.v1 as tf # type: ignore
+from tensorflow.compat.v1 import keras # type: ignore
+from tensorflow.compat.v1.keras import regularizers # type: ignore
+from tensorflow.compat.v1.keras.layers import BatchNormalization # type: ignore
+from tensorflow.compat.v1.keras.layers import Conv2D # type: ignore
+from tensorflow.compat.v1.keras.layers import GlobalAveragePooling2D # type: ignore
+from tensorflow.compat.v1.keras.layers import LeakyReLU # type: ignore
+from tensorflow.compat.v1.keras.layers import UpSampling2D # type: ignore
+from tensorflow.compat.v1.keras.models import Sequential # type: ignore
 
 """# Optional: Cross-View Transformer encoder
 try:
@@ -118,7 +118,7 @@ class DirectionNet(keras.Model):
       n_out: (int) the number of output distributions.
       regularization: L2 regularization factor for layer weights.
     """
-    
+
     super(DirectionNet, self).__init__()
     # Encoder choice
     if encoder_type == 'cvt' and CrossViewTransformerEncoder is not None:
