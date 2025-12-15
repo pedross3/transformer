@@ -25,11 +25,11 @@ from tensorflow.compat.v1.keras.layers import LeakyReLU # type: ignore
 from tensorflow.compat.v1.keras.layers import UpSampling2D # type: ignore
 from tensorflow.compat.v1.keras.models import Sequential # type: ignore
 
-"""# Optional: Cross-View Transformer encoder
+# Optional: Cross-View Transformer encoder
 try:
-  from models.cvt_encoder import CrossViewTransformerEncoder
+  from encoder.cvt_encoder import CrossViewTransformerEncoder
 except Exception:
-  CrossViewTransformerEncoder = None"""
+  CrossViewTransformerEncoder = None
 
 
 class BottleneckResidualUnit(keras.Model):

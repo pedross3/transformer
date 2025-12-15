@@ -9,6 +9,7 @@
 set -e
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+DATA_DIR="$HOME/Documents/data"
 IMAGE_NAME="directionnet_v2"
 IMAGE_TAG="latest"
 CONTAINER_NAME="optimus_prime"
@@ -117,7 +118,7 @@ run_interactive() {
         -v "${SCRIPT_DIR}/checkpoints:/app/checkpoints" \
         -v "${SCRIPT_DIR}/checkpoints_baseline:/app/checkpoints_baseline" \
         -v "${SCRIPT_DIR}/checkpoints_cvt:/app/checkpoints_cvt" \
-        -v "${SCRIPT_DIR}/data:/app/data" \
+        -v "${DATA_DIR}:/app/data"
         -v "${SCRIPT_DIR}/outputs:/app/outputs" \
         "${IMAGE_NAME}:${IMAGE_TAG}" \
         /bin/bash
@@ -130,11 +131,11 @@ run_training() {
     docker run $gpu_flags -it --rm \
         --name "${CONTAINER_NAME}_training" \
         -e TF_FORCE_GPU_ALLOW_GROWTH=true \
-        -v "${SCRIPT_DIR}/checkpoints:/app/checkpoints" \
-        -v "${SCRIPT_DIR}/checkpoints_baseline:/app/checkpoints_baseline" \
-        -v "${SCRIPT_DIR}/checkpoints_cvt:/app/checkpoints_cvt" \
-        -v "${SCRIPT_DIR}/data:/app/data" \
-        -v "${SCRIPT_DIR}/outputs:/app/outputs" \
+        -v "${SCRIPT_DIR}/app/checkpoints" \
+        -v "${SCRIPT_DIR}/app/checkpoints_baseline" \
+        -v "${SCRIPT_DIR}/app/checkpoints_cvt" \
+        -v "${DATA_DIR}:/app/data" \
+        -v "${SCRIPT_DIR}/app/outputs" \
         "${IMAGE_NAME}:${IMAGE_TAG}" \
         python3.6 train.py "$@"
 }
@@ -149,7 +150,7 @@ run_training_r() {
     -v "${SCRIPT_DIR}/checkpoints:/app/checkpoints" \
     -v "${SCRIPT_DIR}/checkpoints_baseline:/app/checkpoints_baseline" \
     -v "${SCRIPT_DIR}/checkpoints_cvt:/app/checkpoints_cvt" \
-    -v "${SCRIPT_DIR}/data:/app/data" \
+    -v "${DATA_DIR}:/app/data" \
     -v "${SCRIPT_DIR}/outputs:/app/outputs" \
     "${IMAGE_NAME}:${IMAGE_TAG}" \
     python3.6 train_R.py "$@"
@@ -165,7 +166,7 @@ run_training_t() {
     -v "${SCRIPT_DIR}/checkpoints:/app/checkpoints" \
     -v "${SCRIPT_DIR}/checkpoints_baseline:/app/checkpoints_baseline" \
     -v "${SCRIPT_DIR}/checkpoints_cvt:/app/checkpoints_cvt" \
-    -v "${SCRIPT_DIR}/data:/app/data" \
+    -v "${DATA_DIR}:/app/data"\
     -v "${SCRIPT_DIR}/outputs:/app/outputs" \
     "${IMAGE_NAME}:${IMAGE_TAG}" \
     python3.6 train_T.py "$@"
@@ -181,7 +182,7 @@ run_training_pdb() {
         -v "${SCRIPT_DIR}/checkpoints:/app/checkpoints" \
         -v "${SCRIPT_DIR}/checkpoints_baseline:/app/checkpoints_baseline" \
         -v "${SCRIPT_DIR}/checkpoints_cvt:/app/checkpoints_cvt" \
-        -v "${SCRIPT_DIR}/data:/app/data" \
+        -v "${DATA_DIR}:/app/data" \
         -v "${SCRIPT_DIR}/outputs:/app/outputs" \
         "${IMAGE_NAME}:${IMAGE_TAG}" \
         python3.6 -m pdb train.py "$@"
@@ -198,7 +199,7 @@ run_training_debugpy() {
         -v "${SCRIPT_DIR}/checkpoints:/app/checkpoints" \
         -v "${SCRIPT_DIR}/checkpoints_baseline:/app/checkpoints_baseline" \
         -v "${SCRIPT_DIR}/checkpoints_cvt:/app/checkpoints_cvt" \
-        -v "${SCRIPT_DIR}/data:/app/data" \
+        -v "${DATA_DIR}:/app/data"\
         -v "${SCRIPT_DIR}/outputs:/app/outputs" \
     "${IMAGE_NAME}:${IMAGE_TAG}" \
     bash -lc 'python3.6 -m pip install --no-cache-dir debugpy && python3.6 -m debugpy --listen 0.0.0.0:5678 --wait-for-client train.py "$@"' bash "$@"
@@ -211,13 +212,12 @@ run_eval() {
     docker run $gpu_flags -it --rm \
         --name "${CONTAINER_NAME}_eval" \
         -e TF_FORCE_GPU_ALLOW_GROWTH=true \
-        -v /home/dhaval/THI/Project_AI/data:/home/dhaval/THI/Project_AI/data \
+        -v /home/Documents/data:/home/Documents/data \
         -v "${SCRIPT_DIR}/eval_data:/app/eval_data" \
         -v "${SCRIPT_DIR}/checkpoints:/app/checkpoints" \
         -v "${SCRIPT_DIR}/checkpoints_baseline:/app/checkpoints_baseline" \
         -v "${SCRIPT_DIR}/checkpoints_cvt:/app/checkpoints_cvt" \
-        -v "${SCRIPT_DIR}/data:/app/data" \
-        -v "${SCRIPT_DIR}/outputs:/app/outputs" \
+        -v "${DATA_DIR}:/app/data" \
         -v "${SCRIPT_DIR}/eval_summary:/app/eval_summary" \
         "${IMAGE_NAME}:${IMAGE_TAG}" \
         python3.6 eval_fixed.py "$@"
@@ -306,7 +306,7 @@ VS Code attach (add to .vscode/launch.json):
 }
 
 Then run:
-  $0 train-debug --data_dir /app/data --checkpoint_dir /app/checkpoints
+  $0 train-debug --data_dir -v /home/Documents/data:/app/data --checkpoint_dir /app/checkpoints
 and press F5 to attach.
 
 EOF
