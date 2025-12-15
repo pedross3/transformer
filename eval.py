@@ -32,7 +32,7 @@ flags.DEFINE_string(
     'The test data directory.')
 flags.DEFINE_string('save_summary_dir', '', 'The directory to save summary.')
 flags.DEFINE_string(
-    'checkpoint_dir', '', 'The directory to load the checkpoints.')
+    'checkpoint_dir', '/app/checkpoints', 'The directory to load the checkpoints.')
 flags.DEFINE_string(
     'model', '9D', '9D(rotation), T(translation), Single(DirectionNet-Single)')
 flags.DEFINE_integer('batch', 1, 'Size of mini-batches.')

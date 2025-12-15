@@ -111,11 +111,12 @@ class BottleneckResidualUnit(keras.Model):
 class DirectionNet(keras.Model):
   """DirectionNet generates spherical probability distributions from images."""
 
-  def __init__(self, n_out, regularization=0.01):
+  def __init__(self, n_out, encoder_type, regularization=0.01):
     """Initialize the DirectionNet.
 
     Args:
       n_out: (int) the number of output distributions.
+      encoder_type = choose between cvt and siamese
       regularization: L2 regularization factor for layer weights.
     """
 
@@ -127,7 +128,7 @@ class DirectionNet(keras.Model):
       self.encoder = SiameseEncoder() 
     self.inplanes = self.encoder.inplanes
     
-    self.encoder = SiameseEncoder()
+    
     self.inplanes = self.encoder.inplanes
     self.decoder_block1 = Sequential([
         Conv2D(256,

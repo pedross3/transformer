@@ -6,13 +6,25 @@
 # Link to download dataset: 
 # https://drive.google.com/file/d/1SB1g8ectHyhG23g8FqiwKJApyvmK5Sc9/view?usp=sharing
 
+# PORT WAS CHANGED FROM 5678 TO 6006
+
 set -e
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-DATA_DIR="$HOME/Documents/data"
+DATA_DIR="$HOME/Documents/data/R90_fov90/test"
 IMAGE_NAME="directionnet_v2"
 IMAGE_TAG="latest"
 CONTAINER_NAME="optimus_prime"
+
+
+DOCKERFLAGS=(
+        -e TF_FORCE_GPU_ALLOW_GROWTH=true 
+        -v "${SCRIPT_DIR}:/app/" 
+        -v "${DATA_DIR}:/app/data"
+        "${IMAGE_NAME}:${IMAGE_TAG}" 
+)
+
+
 
 # Colors for output
 RED='\033[0;31m'
@@ -112,15 +124,7 @@ get_gpu_flags() {
 run_interactive() {
     print_info "Starting container in interactive mode..."
     local gpu_flags=$(get_gpu_flags)
-    docker run $gpu_flags -it --rm \
-        --name "${CONTAINER_NAME}" \
-        -e TF_FORCE_GPU_ALLOW_GROWTH=true \
-        -v "${SCRIPT_DIR}/checkpoints:/app/checkpoints" \
-        -v "${SCRIPT_DIR}/checkpoints_baseline:/app/checkpoints_baseline" \
-        -v "${SCRIPT_DIR}/checkpoints_cvt:/app/checkpoints_cvt" \
-        -v "${DATA_DIR}:/app/data"
-        -v "${SCRIPT_DIR}/outputs:/app/outputs" \
-        "${IMAGE_NAME}:${IMAGE_TAG}" \
+    docker run $gpu_flags -it --rm "${DOCKERFLAGS[@]}" \
         /bin/bash
 }
 
@@ -128,15 +132,7 @@ run_interactive() {
 run_training() {
     print_info "Starting training..."
     local gpu_flags=$(get_gpu_flags)
-    docker run $gpu_flags -it --rm \
-        --name "${CONTAINER_NAME}_training" \
-        -e TF_FORCE_GPU_ALLOW_GROWTH=true \
-        -v "${SCRIPT_DIR}/app/checkpoints" \
-        -v "${SCRIPT_DIR}/app/checkpoints_baseline" \
-        -v "${SCRIPT_DIR}/app/checkpoints_cvt" \
-        -v "${DATA_DIR}:/app/data" \
-        -v "${SCRIPT_DIR}/app/outputs" \
-        "${IMAGE_NAME}:${IMAGE_TAG}" \
+    docker run $gpu_flags -it --rm "${DOCKERFLAGS[@]}" \
         python3.6 train.py "$@"
 }
 
@@ -177,31 +173,17 @@ run_training_pdb() {
     print_info "Starting training under pdb (Python debugger)..."
     local gpu_flags=$(get_gpu_flags)
     docker run $gpu_flags -it --rm \
-        --name "${CONTAINER_NAME}_training_pdb" \
-        -e TF_FORCE_GPU_ALLOW_GROWTH=true \
-        -v "${SCRIPT_DIR}/checkpoints:/app/checkpoints" \
-        -v "${SCRIPT_DIR}/checkpoints_baseline:/app/checkpoints_baseline" \
-        -v "${SCRIPT_DIR}/checkpoints_cvt:/app/checkpoints_cvt" \
-        -v "${DATA_DIR}:/app/data" \
-        -v "${SCRIPT_DIR}/outputs:/app/outputs" \
-        "${IMAGE_NAME}:${IMAGE_TAG}" \
+        "${DOCKERFLAGS[@]}" \
         python3.6 -m pdb train.py "$@"
 }
 
 # Run training with VS Code debugpy (remote attach)
 run_training_debugpy() {
-    print_info "Starting training with debugpy (VS Code attach on localhost:5678)..."
+    print_info "Starting training with debugpy (VS Code attach on localhost:6006)..."
     local gpu_flags=$(get_gpu_flags)
     docker run $gpu_flags -it --rm \
-        --name "${CONTAINER_NAME}_training_debug" \
         -p 5678:5678 \
-        -e TF_FORCE_GPU_ALLOW_GROWTH=true \
-        -v "${SCRIPT_DIR}/checkpoints:/app/checkpoints" \
-        -v "${SCRIPT_DIR}/checkpoints_baseline:/app/checkpoints_baseline" \
-        -v "${SCRIPT_DIR}/checkpoints_cvt:/app/checkpoints_cvt" \
-        -v "${DATA_DIR}:/app/data"\
-        -v "${SCRIPT_DIR}/outputs:/app/outputs" \
-    "${IMAGE_NAME}:${IMAGE_TAG}" \
+        "${DOCKERFLAGS[@]}" \
     bash -lc 'python3.6 -m pip install --no-cache-dir debugpy && python3.6 -m debugpy --listen 0.0.0.0:5678 --wait-for-client train.py "$@"' bash "$@"
 }
 
@@ -210,24 +192,15 @@ run_eval() {
     print_info "Starting evaluation..."
     local gpu_flags=$(get_gpu_flags)
     docker run $gpu_flags -it --rm \
-        --name "${CONTAINER_NAME}_eval" \
-        -e TF_FORCE_GPU_ALLOW_GROWTH=true \
-        -v /home/Documents/data:/home/Documents/data \
-        -v "${SCRIPT_DIR}/eval_data:/app/eval_data" \
-        -v "${SCRIPT_DIR}/checkpoints:/app/checkpoints" \
-        -v "${SCRIPT_DIR}/checkpoints_baseline:/app/checkpoints_baseline" \
-        -v "${SCRIPT_DIR}/checkpoints_cvt:/app/checkpoints_cvt" \
-        -v "${DATA_DIR}:/app/data" \
-        -v "${SCRIPT_DIR}/eval_summary:/app/eval_summary" \
-        "${IMAGE_NAME}:${IMAGE_TAG}" \
-        python3.6 eval_fixed.py "$@"
+        "${DOCKERFLAGS[@]}" \
+        python3.6 eval.py "$@"
 }
 
 # Run TensorBoard
 run_tensorboard() {
     print_info "Starting TensorBoard on port 6006..."
     local gpu_flags=$(get_gpu_flags)
-    docker run $gpu_flags -d \
+    docker run $gpu_flags -d --rm \
         --name "${CONTAINER_NAME}_tensorboard" \
         -e TF_FORCE_GPU_ALLOW_GROWTH=true \
         -p 6006:6006 \
@@ -276,7 +249,7 @@ Commands:
     train           Run training script with optional arguments
     train-r         Run rotation-only training (train_R.py) with optional arguments
     train-pdb       Run training under pdb (CLI debugger)
-    train-debug     Run training with debugpy (VS Code remote attach on :5678)
+    train-debug     Run training with debugpy (VS Code remote attach on :6006)
     eval            Run evaluation script with optional arguments
     tensorboard     Start TensorBoard service
     test-gpu        Test GPU access in container
@@ -301,7 +274,7 @@ VS Code attach (add to .vscode/launch.json):
   "name": "Attach to Docker: DirectionNet",
   "type": "python",
   "request": "attach",
-  "connect": { "host": "localhost", "port": 5678 },
+  "connect": { "host": "localhost", "port": 6006 },
   "justMyCode": false
 }
 
